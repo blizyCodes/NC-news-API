@@ -1,3 +1,3 @@
-# Northcoders News API
+# News API
 
 
