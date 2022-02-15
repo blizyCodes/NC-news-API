@@ -46,7 +46,7 @@ describe("/api/topics", () => {
 describe("/api/articles/:article_id", () => {
   describe("GET", () => {
     describe("STATUS 200", () => {
-      test.only("should respond with an article object with properties: author, title, article_id, body,topic,created_at and votes", () => {
+      test("should respond with an article object with properties: author, title, article_id, body,topic,created_at and votes", () => {
         const ARTICLE_ID = 1;
         return request(app)
           .get(`/api/articles/${ARTICLE_ID}`)
@@ -63,6 +63,26 @@ describe("/api/articles/:article_id", () => {
                 votes: expect.any(Number),
               })
             );
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with Bad Request when given an invalid id (not a number)", () => {
+        return request(app)
+          .get("/api/articles/notAnID")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("should respond with not found if valid but non existent article currently", () => {
+        return request(app)
+          .get("/api/articles/999")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("article not found");
           });
       });
     });
