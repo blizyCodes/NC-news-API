@@ -96,6 +96,50 @@ describe("/api/articles/:article_id", () => {
       });
     });
   });
+  describe("PATCH", () => {
+    describe("STATUS 200", () => {
+      test("should respond with the article with updated vote count", () => {
+        const voteUpdates = { inc_votes: -5 };
+        return request(app)
+          .patch("/api/articles/3")
+          .send(voteUpdates)
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).toEqual({
+              article_id: 3,
+              title: "Eight pug gifs that remind me of mitch",
+              topic: "mitch",
+              author: "icellusedkars",
+              body: "some gifs",
+              created_at: "2020-11-03T09:12:00.000Z",
+              votes: -5,
+            });
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with Bad Request when given an invalid id (not a number)", () => {
+        const voteUpdates = { inc_votes: 5 };
+        return request(app)
+          .patch("/api/articles/notAnId")
+          .send(voteUpdates)
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+      test("should respond with bad request when given an empty object as body", () => {
+        const voteUpdates = {};
+        return request(app)
+          .patch("/api/articles/3")
+          .send(voteUpdates)
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("no updates requested");
+          });
+      });
+    });
+  });
 });
 
 // describe("/api/users", () => {
