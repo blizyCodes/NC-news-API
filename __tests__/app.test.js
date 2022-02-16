@@ -169,3 +169,31 @@ describe("/api/articles/:article_id", () => {
     });
   });
 });
+
+describe("/api/users", () => {
+  describe("GET", () => {
+    describe("STATUS 200", () => {
+      test("should respond with an array of objects with property username", () => {
+        return request(app)
+          .get("/api/users")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users).toHaveLength(4);
+            users.forEach((user) => {
+              expect(user).toEqual(
+                expect.objectContaining({
+                  username: expect.any(String),
+                })
+              );
+            });
+            expect(users).toEqual([
+              { username: "butter_bridge" },
+              { username: "icellusedkars" },
+              { username: "rogersop" },
+              { username: "lurker" },
+            ]);
+          });
+      });
+    });
+  });
+});
