@@ -31,3 +31,10 @@ exports.updateArticlebyId = async (voteUpdates, id) => {
   }
   return article;
 };
+
+exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
+  const { rows } = await db.query(
+    `SELECT * FROM articles ORDER BY ${sort_by} ${order};`
+  );
+  return rows;
+};
