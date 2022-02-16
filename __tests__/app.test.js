@@ -13,7 +13,7 @@ describe("/api/topics", () => {
       test("respond with 200", () => {
         return request(app).get("/api/topics").expect(200);
       });
-      test("should respond with array of topics objects", () => {
+      test("should respond with array of topics objects with slug and description properties", () => {
         return request(app)
           .get("/api/topics")
           .expect(200)
@@ -37,6 +37,61 @@ describe("/api/topics", () => {
           .expect(404)
           .then(({ body: { msg } }) => {
             expect(msg).toBe("path not found");
+          });
+      });
+    });
+  });
+});
+
+describe("/api/articles/:article_id", () => {
+  describe("GET", () => {
+    describe("STATUS 200", () => {
+      test("should respond with an article object with properties: author, title, article_id, body,topic,created_at and votes", () => {
+        const ARTICLE_ID = 1;
+        return request(app)
+          .get(`/api/articles/${ARTICLE_ID}`)
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).toEqual(
+              expect.objectContaining({
+                author: expect.any(String),
+                title: expect.any(String),
+                article_id: expect.any(Number),
+                body: expect.any(String),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+              })
+            );
+            expect(article).toEqual({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2020-07-09T20:11:00.000Z",
+              votes: 100,
+            });
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with Bad Request when given an invalid id (not a number)", () => {
+        return request(app)
+          .get("/api/articles/notAnID")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("should respond with not found if valid but non existent article currently", () => {
+        return request(app)
+          .get("/api/articles/999")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("article not found");
           });
       });
     });
