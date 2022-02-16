@@ -9,6 +9,7 @@ const {
 const {
   getArticleById,
   patchArticleById,
+  getArticles,
 } = require("./controllers/articles-controllers");
 
 const app = express();
@@ -18,6 +19,9 @@ app.get("/api/topics", getTopics);
 
 app.get("/api/articles/:article_id", getArticleById);
 app.patch("/api/articles/:article_id", patchArticleById);
+
+// app.get("/api/articles", getArticles);
+
 
 //path not found
 app.get("/*", invalidEndpoint);
