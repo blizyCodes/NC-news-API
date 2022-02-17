@@ -67,247 +67,262 @@ describe("/api/articles", () => {
             expect(articles).toBeSortedBy("created_at", { descending: true });
           });
       });
-    });
-  });
-});
-
-describe("/api/articles/:article_id", () => {
-  describe("GET", () => {
-    describe("STATUS 200", () => {
-      test("should respond with an article object with properties: author, title, article_id, body,topic,created_at and votes", () => {
-        const ARTICLE_ID = 1;
+      test("should also include comment_count as a property", () => {
         return request(app)
-          .get(`/api/articles/${ARTICLE_ID}`)
+          .get("/api/articles")
           .expect(200)
-          .then(({ body: { article } }) => {
-            expect(article).toEqual(
-              expect.objectContaining({
-                author: expect.any(String),
-                title: expect.any(String),
-                article_id: expect.any(Number),
-                body: expect.any(String),
-                topic: expect.any(String),
-                created_at: expect.any(String),
-                votes: expect.any(Number),
-                comment_count: expect.any(Number),
-              })
-            );
-            expect(article).toEqual({
-              article_id: 1,
-              title: "Living in the shadow of a great man",
-              topic: "mitch",
-              author: "butter_bridge",
-              body: "I find this existence challenging",
-              created_at: "2020-07-09T20:11:00.000Z",
-              votes: 100,
-              comment_count: 11,
-            });
-          });
-      });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with Bad Request when given an invalid id (not a number)", () => {
-        return request(app)
-          .get("/api/articles/notAnID")
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with not found if valid but non existent article currently", () => {
-        return request(app)
-          .get("/api/articles/999")
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
-          });
-      });
-    });
-  });
-  describe("PATCH", () => {
-    describe("STATUS 200", () => {
-      test("should respond with the article with updated vote count", () => {
-        const voteUpdates = { inc_votes: -5 };
-        return request(app)
-          .patch("/api/articles/3")
-          .send(voteUpdates)
-          .expect(200)
-          .then(({ body: { article } }) => {
-            expect(article).toEqual({
-              article_id: 3,
-              title: "Eight pug gifs that remind me of mitch",
-              topic: "mitch",
-              author: "icellusedkars",
-              body: "some gifs",
-              created_at: "2020-11-03T09:12:00.000Z",
-              votes: -5,
-            });
-          });
-      });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with Bad Request when given an invalid id (not a number)", () => {
-        const voteUpdates = { inc_votes: 5 };
-        return request(app)
-          .patch("/api/articles/notAnId")
-          .send(voteUpdates)
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-      test("should respond with bad request when given an empty object as body", () => {
-        const voteUpdates = {};
-        return request(app)
-          .patch("/api/articles/3")
-          .send(voteUpdates)
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("no updates requested");
-          });
-      });
-    });
-  });
-});
-
-describe("/api/users", () => {
-  describe("GET", () => {
-    describe("STATUS 200", () => {
-      test("should respond with an array of objects with property username", () => {
-        return request(app)
-          .get("/api/users")
-          .expect(200)
-          .then(({ body: { users } }) => {
-            expect(users).toHaveLength(4);
-            users.forEach((user) => {
-              expect(user).toEqual(
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(12);
+            articles.forEach((article) => {
+              expect(article).toEqual(
                 expect.objectContaining({
-                  username: expect.any(String),
+                  comment_count: expect.any(Number),
                 })
               );
             });
-            expect(users).toEqual([
-              { username: "butter_bridge" },
-              { username: "icellusedkars" },
-              { username: "rogersop" },
-              { username: "lurker" },
-            ]);
           });
       });
     });
   });
-});
 
-describe("/api/articles/:article_id/comments", () => {
-  describe("GET", () => {
-    describe("STATUS 200", () => {
-      test("should respond with an array of comments objects with comment_id, votes, created_at, author and body properties", () => {
-        const ARTICLE_ID = 5;
-        return request(app)
-          .get(`/api/articles/${ARTICLE_ID}/comments`)
-          .expect(200)
-          .then(({ body: { comments } }) => {
-            expect(comments).toHaveLength(2);
-            comments.forEach((comment) => {
+  describe("/api/articles/:article_id", () => {
+    describe("GET", () => {
+      describe("STATUS 200", () => {
+        test("should respond with an article object with properties: author, title, article_id, body,topic,created_at and votes", () => {
+          const ARTICLE_ID = 1;
+          return request(app)
+            .get(`/api/articles/${ARTICLE_ID}`)
+            .expect(200)
+            .then(({ body: { article } }) => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: expect.any(Number),
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  comment_count: expect.any(Number),
+                })
+              );
+              expect(article).toEqual({
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "I find this existence challenging",
+                created_at: "2020-07-09T20:11:00.000Z",
+                votes: 100,
+                comment_count: 11,
+              });
+            });
+        });
+      });
+      describe("STATUS 400", () => {
+        test("should respond with Bad Request when given an invalid id (not a number)", () => {
+          return request(app)
+            .get("/api/articles/notAnID")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+      });
+      describe("STATUS 404", () => {
+        test("should respond with not found if valid but non existent article currently", () => {
+          return request(app)
+            .get("/api/articles/999")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("article not found");
+            });
+        });
+      });
+    });
+    describe("PATCH", () => {
+      describe("STATUS 200", () => {
+        test("should respond with the article with updated vote count", () => {
+          const voteUpdates = { inc_votes: -5 };
+          return request(app)
+            .patch("/api/articles/3")
+            .send(voteUpdates)
+            .expect(200)
+            .then(({ body: { article } }) => {
+              expect(article).toEqual({
+                article_id: 3,
+                title: "Eight pug gifs that remind me of mitch",
+                topic: "mitch",
+                author: "icellusedkars",
+                body: "some gifs",
+                created_at: "2020-11-03T09:12:00.000Z",
+                votes: -5,
+              });
+            });
+        });
+      });
+      describe("STATUS 400", () => {
+        test("should respond with Bad Request when given an invalid id (not a number)", () => {
+          const voteUpdates = { inc_votes: 5 };
+          return request(app)
+            .patch("/api/articles/notAnId")
+            .send(voteUpdates)
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+        test("should respond with bad request when given an empty object as body", () => {
+          const voteUpdates = {};
+          return request(app)
+            .patch("/api/articles/3")
+            .send(voteUpdates)
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("no updates requested");
+            });
+        });
+      });
+    });
+  });
+
+  describe("/api/users", () => {
+    describe("GET", () => {
+      describe("STATUS 200", () => {
+        test("should respond with an array of objects with property username", () => {
+          return request(app)
+            .get("/api/users")
+            .expect(200)
+            .then(({ body: { users } }) => {
+              expect(users).toHaveLength(4);
+              users.forEach((user) => {
+                expect(user).toEqual(
+                  expect.objectContaining({
+                    username: expect.any(String),
+                  })
+                );
+              });
+              expect(users).toEqual([
+                { username: "butter_bridge" },
+                { username: "icellusedkars" },
+                { username: "rogersop" },
+                { username: "lurker" },
+              ]);
+            });
+        });
+      });
+    });
+  });
+
+  describe("/api/articles/:article_id/comments", () => {
+    describe("GET", () => {
+      describe("STATUS 200", () => {
+        test("should respond with an array of comments objects with comment_id, votes, created_at, author and body properties", () => {
+          const ARTICLE_ID = 5;
+          return request(app)
+            .get(`/api/articles/${ARTICLE_ID}/comments`)
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments).toHaveLength(2);
+              comments.forEach((comment) => {
+                expect(comment).toEqual(
+                  expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                  })
+                );
+              });
+            });
+        });
+        test("should respond with empty array if no comments for said article", () => {
+          const ARTICLE_ID = 2;
+          return request(app)
+            .get(`/api/articles/${ARTICLE_ID}/comments`)
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments).toHaveLength(0);
+            });
+        });
+      });
+      describe("STATUS 404", () => {
+        test("should respond with not found if valid but non existent article currently", () => {
+          return request(app)
+            .get("/api/articles/999/comments")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("article not found");
+            });
+        });
+      });
+      describe("STATUS 400", () => {
+        test("should respond with Bad Request when given an invalid id (not a number)", () => {
+          return request(app)
+            .get("/api/articles/notAnID/comments")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+      });
+    });
+    describe("POST", () => {
+      describe("STATUS 201", () => {
+        test("should accept request body and respond with the posted comment object with username and body properties", () => {
+          const ARTICLE_ID = 5;
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({ username: "icellusedkars", body: "just a test" })
+            .expect(201)
+            .then(({ body: { comment } }) => {
               expect(comment).toEqual(
                 expect.objectContaining({
-                  comment_id: expect.any(Number),
-                  votes: expect.any(Number),
+                  comment_id: 19,
+                  author: "icellusedkars",
+                  body: "just a test",
+                  votes: 0,
+                  article_id: 5,
                   created_at: expect.any(String),
-                  author: expect.any(String),
-                  body: expect.any(String),
                 })
               );
             });
-          });
+        });
       });
-      test("should respond with empty array if no comments for said article", () => {
-        const ARTICLE_ID = 2;
-        return request(app)
-          .get(`/api/articles/${ARTICLE_ID}/comments`)
-          .expect(200)
-          .then(({ body: { comments } }) => {
-            expect(comments).toHaveLength(0);
-          });
+      describe("STATUS 400", () => {
+        test("should respond with bad request if given a string for article id", () => {
+          const ARTICLE_ID = "notanId";
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({ username: "icellusedkars", body: "just a test" })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+        test("should respond with bad request if given an empty object)", () => {
+          const ARTICLE_ID = 5;
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({})
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("no comment submitted");
+            });
+        });
       });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with not found if valid but non existent article currently", () => {
-        return request(app)
-          .get("/api/articles/999/comments")
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
-          });
-      });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with Bad Request when given an invalid id (not a number)", () => {
-        return request(app)
-          .get("/api/articles/notAnID/comments")
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-    });
-  });
-  describe("POST", () => {
-    describe("STATUS 201", () => {
-      test("should accept request body and respond with the posted comment object with username and body properties", () => {
-        const ARTICLE_ID = 5;
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({ username: "icellusedkars", body: "just a test" })
-          .expect(201)
-          .then(({ body: { comment } }) => {
-            expect(comment).toEqual(
-              expect.objectContaining({
-                comment_id: 19,
-                author: "icellusedkars",
-                body: "just a test",
-                votes: 0,
-                article_id: 5,
-                created_at: expect.any(String),
-              })
-            );
-          });
-      });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with bad request if given a string for article id", () => {
-        const ARTICLE_ID = "notanId";
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({ username: "icellusedkars", body: "just a test" })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-      test("should respond with bad request if given an empty object)", () => {
-        const ARTICLE_ID = 5;
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({})
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("no comment submitted");
-          });
-      });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with not found if valid but non existent article currently", () => {
-        const ARTICLE_ID = "555";
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({ username: "icellusedkars", body: "just a test" })
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
-          });
+      describe("STATUS 404", () => {
+        test("should respond with not found if valid but non existent article currently", () => {
+          const ARTICLE_ID = "555";
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({ username: "icellusedkars", body: "just a test" })
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("article not found");
+            });
+        });
       });
     });
   });

@@ -23,7 +23,6 @@ exports.patchArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  console.log("hi");
   selectArticles()
     .then((articles) => {
       res.status(200).send({ articles });
