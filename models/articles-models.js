@@ -36,16 +36,7 @@ exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
   const { rows } = await db.query(
     `SELECT article_id, author, title, topic, created_at, votes FROM articles ORDER BY ${sort_by} ${order};`
   );
-  console.log(rows);
-  return rows;
-};
-
-exports.selectComments = async (id) => {
-  const { rows } = await db.query(
-    "SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body FROM comments JOIN articles ON articles.article_id = comments.article_id WHERE articles.article_id = $1;",
-    [id]
-  );
-
+  console.log("hi again");
   return rows;
 };
 
