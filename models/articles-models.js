@@ -36,7 +36,7 @@ exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
   const { rows } = await db.query(
     `SELECT article_id, author, title, topic, created_at, votes FROM articles ORDER BY ${sort_by} ${order};`
   );
-  console.log("hi again")
+  console.log("hi again");
   return rows;
 };
 

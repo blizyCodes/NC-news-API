@@ -254,24 +254,61 @@ describe("/api/articles/:article_id/comments", () => {
       });
     });
   });
-  // describe("POST", () => {
-  //   describe("STATUS 201", () => {
-  //     test("should accept request body and respond with the posted comment object with username and body properties", () => {
-  //       const ARTICLE_ID = 5;
-  //       return request(app)
-  //         .post(`/api/articles/${ARTICLE_ID}/comments`)
-  //         .send({ username: "jessjelly", body: "just a test" })
-  //         .expect(201)
-  //         .then(({ body: { comment } }) => {
-  //           expect(comment).toEqual(
-  //             expect.objectContaining({
-  //               username: expect.any(String),
-  //               body: expect.any(String),
-  //             })
-  //           );
-  //           expect(comment).toBe({})
-  //         });
-  //     });
-  //   });
-  // });
+  describe("POST", () => {
+    describe("STATUS 201", () => {
+      test("should accept request body and respond with the posted comment object with username and body properties", () => {
+        const ARTICLE_ID = 5;
+        return request(app)
+          .post(`/api/articles/${ARTICLE_ID}/comments`)
+          .send({ username: "icellusedkars", body: "just a test" })
+          .expect(201)
+          .then(({ body: { comment } }) => {
+            expect(comment).toEqual(
+              expect.objectContaining({
+                comment_id: 19,
+                author: "icellusedkars",
+                body: "just a test",
+                votes: 0,
+                article_id: 5,
+                created_at: expect.any(String),
+              })
+            );
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with bad request if given a string for article id", () => {
+        const ARTICLE_ID = "notanId";
+        return request(app)
+          .post(`/api/articles/${ARTICLE_ID}/comments`)
+          .send({ username: "icellusedkars", body: "just a test" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+      test("should respond with bad request if given an empty object)", () => {
+        const ARTICLE_ID = 5;
+        return request(app)
+          .post(`/api/articles/${ARTICLE_ID}/comments`)
+          .send({})
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("no comment submitted");
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("should respond with not found if valid but non existent article currently", () => {
+        const ARTICLE_ID = "555";
+        return request(app)
+          .post(`/api/articles/${ARTICLE_ID}/comments`)
+          .send({ username: "icellusedkars", body: "just a test" })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("article not found");
+          });
+      });
+    });
+  });
 });
