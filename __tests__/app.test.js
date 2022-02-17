@@ -169,3 +169,30 @@ describe("/api/users", () => {
     });
   });
 });
+
+// describe("/api/articles/:article_id/comments", () => {
+//   describe("GET", () => {
+//     describe("STATUS 200", () => {
+//       test("should respond with an array of comments objects with comment_id, votes, created_at, author and body properties", () => {
+//         const ARTICLE_ID = 5;
+//         return request(app)
+//           .get(`/api/articles/${ARTICLE_ID}/comments`)
+//           .expect(200)
+//           .then(({ body: { comments } }) => {
+//             expect(comments).toHaveLength(2);
+//             comments.forEach((comment) => {
+//               expect(comment).toEqual(
+//                 expect.objectContaining({
+//                   comment_id: expect.any(Number),
+//                   votes: expect.any(Number),
+//                   created_at: expect.any(String),
+//                   author: expect.any(String),
+//                   body: expect.any(String),
+//                 })
+//               );
+//             });
+//           });
+//       });
+//     });
+//   });
+// });
