@@ -223,15 +223,33 @@ describe("/api/articles/:article_id/comments", () => {
             });
           });
       });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with no comments found for this article if there are no comments", () => {
+      test("should respond with empty array if no comments for said article", () => {
         const ARTICLE_ID = 2;
         return request(app)
           .get(`/api/articles/${ARTICLE_ID}/comments`)
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toHaveLength(0);
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("should respond with not found if valid but non existent article currently", () => {
+        return request(app)
+          .get("/api/articles/999/comments")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("no comments found for this article");
+            expect(msg).toBe("article not found");
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with Bad Request when given an invalid id (not a number)", () => {
+        return request(app)
+          .get("/api/articles/notAnID/comments")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
           });
       });
     });
