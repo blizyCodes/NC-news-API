@@ -43,6 +43,34 @@ describe("/api/topics", () => {
   });
 });
 
+describe("/api/articles", () => {
+  describe("GET", () => {
+    describe("STATUS 200", () => {
+      test("should respond with an array of article objects with author,title,article_id,topic,created_at and votes properties", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(12);
+            articles.forEach((article) => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  article_id: expect.any(Number),
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                })
+              );
+            });
+            expect(articles).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+    });
+  });
+});
+
 describe("/api/articles/:article_id", () => {
   describe("GET", () => {
     describe("STATUS 200", () => {
@@ -61,6 +89,7 @@ describe("/api/articles/:article_id", () => {
                 topic: expect.any(String),
                 created_at: expect.any(String),
                 votes: expect.any(Number),
+                comment_count: expect.any(Number),
               })
             );
             expect(article).toEqual({
@@ -71,6 +100,7 @@ describe("/api/articles/:article_id", () => {
               body: "I find this existence challenging",
               created_at: "2020-07-09T20:11:00.000Z",
               votes: 100,
+              comment_count: 11,
             });
           });
       });
