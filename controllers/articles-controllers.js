@@ -2,8 +2,6 @@ const {
   selectArticleById,
   updateArticlebyId,
   selectArticles,
-  selectComments,
-  checkArticleExists,
 } = require("../models/articles-models");
 
 exports.getArticleById = (req, res, next) => {
@@ -25,18 +23,10 @@ exports.patchArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
+  console.log("hi");
   selectArticles()
     .then((articles) => {
       res.status(200).send({ articles });
-    })
-    .catch((err) => next(err));
-};
-
-exports.getCommentsByArticleId = (req, res, next) => {
-  const { article_id: articleId } = req.params;
-  Promise.all([selectComments(articleId), checkArticleExists(articleId)])
-    .then(([comments]) => {
-      res.status(200).send({ comments });
     })
     .catch((err) => next(err));
 };

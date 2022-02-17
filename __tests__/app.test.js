@@ -254,4 +254,24 @@ describe("/api/articles/:article_id/comments", () => {
       });
     });
   });
+  // describe("POST", () => {
+  //   describe("STATUS 201", () => {
+  //     test("should accept request body and respond with the posted comment object with username and body properties", () => {
+  //       const ARTICLE_ID = 5;
+  //       return request(app)
+  //         .post(`/api/articles/${ARTICLE_ID}/comments`)
+  //         .send({ username: "jessjelly", body: "just a test" })
+  //         .expect(201)
+  //         .then(({ body: { comment } }) => {
+  //           expect(comment).toEqual(
+  //             expect.objectContaining({
+  //               username: expect.any(String),
+  //               body: expect.any(String),
+  //             })
+  //           );
+  //           expect(comment).toBe({})
+  //         });
+  //     });
+  //   });
+  // });
 });

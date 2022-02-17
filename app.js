@@ -6,12 +6,17 @@ const {
   handleServerErrors,
   handlePsqlErrors,
 } = require("./errors");
+
 const {
   getArticleById,
   patchArticleById,
   getArticles,
-  getCommentsByArticleId,
 } = require("./controllers/articles-controllers");
+
+const {
+  getCommentsByArticleId,
+} = require("./controllers/comments-controllers");
+
 const { getUsers } = require("./controllers/users-controllers");
 
 const app = express();
