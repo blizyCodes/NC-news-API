@@ -34,9 +34,18 @@ exports.updateArticlebyId = async (voteUpdates, id) => {
 
 exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
   const { rows } = await db.query(
-    `SELECT article_id, author, title, topic, created_at, votes FROM articles ORDER BY ${sort_by} ${order};`
+    `SELECT
+    articles.article_id, 
+    articles.title, 
+    articles.topic, 
+    articles.author, 
+    articles.created_at, 
+    articles.votes,
+    COUNT(comments.article_id)::int AS comment_count 
+   FROM articles
+   LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`
   );
-  console.log("hi again");
+  console.log(rows);
   return rows;
 };
 

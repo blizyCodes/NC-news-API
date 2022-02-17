@@ -46,7 +46,7 @@ describe("/api/topics", () => {
 describe("/api/articles", () => {
   describe("GET", () => {
     describe("STATUS 200", () => {
-      test("should respond with an array of article objects with author,title,article_id,topic,created_at and votes properties", () => {
+      test.only("should respond with an array of article objects with author,title,article_id,topic,created_at and votes properties + comment_count", () => {
         return request(app)
           .get("/api/articles")
           .expect(200)
@@ -61,6 +61,7 @@ describe("/api/articles", () => {
                   topic: expect.any(String),
                   created_at: expect.any(String),
                   votes: expect.any(Number),
+                  comment_count: expect.any(Number),
                 })
               );
             });
