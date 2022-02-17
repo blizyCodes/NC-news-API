@@ -45,7 +45,6 @@ exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
    FROM articles
    LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`
   );
-  console.log(rows);
   return rows;
 };
 

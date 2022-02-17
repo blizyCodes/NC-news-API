@@ -22,7 +22,5 @@ exports.insertComment = async (usersComment, id) => {
     `INSERT INTO comments (article_id, author, body) VALUES ($1, $2, $3) RETURNING *;`,
     [id, username, body]
   );
-
-  console.log(rows);
   return rows[0];
 };
