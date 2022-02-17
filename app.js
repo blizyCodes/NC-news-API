@@ -10,6 +10,7 @@ const {
   getArticleById,
   patchArticleById,
   getArticles,
+  getCommentsByArticleId,
 } = require("./controllers/articles-controllers");
 const { getUsers } = require("./controllers/users-controllers");
 
@@ -23,7 +24,7 @@ app.patch("/api/articles/:article_id", patchArticleById);
 app.get("/api/users", getUsers);
 
 app.get("/api/articles", getArticles);
-
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 //path not found
 app.get("/*", invalidEndpoint);
