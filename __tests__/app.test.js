@@ -7,6 +7,20 @@ const db = require("../db/connection");
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
+describe("/api", () => {
+  describe("GET", () => {
+    describe("STATUS 200", () => {
+      test("should respond with a JSON file with all endpoints", () => {
+        return request(app)
+          .get("/api")
+          .expect(200)
+          .then(({ body }) => {
+            expect(typeof body).toBe("object");
+          });
+      });
+    });
+  });
+});
 describe("/api/topics", () => {
   describe("GET", () => {
     describe("STATUS 200", () => {

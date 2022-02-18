@@ -19,19 +19,21 @@ const {
 } = require("./controllers/comments-controllers");
 
 const { getUsers } = require("./controllers/users-controllers");
+const { getEndpoints } = require("./controllers/utility-controllers");
 
 const app = express();
 app.use(express.json());
 
+//endpoints
+app.get("/api", getEndpoints);
 app.get("/api/topics", getTopics);
-
 app.get("/api/articles/:article_id", getArticleById);
 app.patch("/api/articles/:article_id", patchArticleById);
 app.get("/api/users", getUsers);
-
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
-app.post("/api/articles/:article_id/comments", postComment)
+app.post("/api/articles/:article_id/comments", postComment);
+
 //path not found
 app.get("/*", invalidEndpoint);
 
