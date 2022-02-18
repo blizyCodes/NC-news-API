@@ -401,12 +401,21 @@ describe("/api/comments/:comment_id", () => {
         return request(app).delete("/api/comments/1").expect(204);
       });
       test("should ensure comment is deleted", () => {
+        const comment1 = {
+          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+          votes: 16,
+          author: "butter_bridge",
+          article_id: 9,
+          created_at: 1586179020000,
+        };
         return request(app)
           .delete("/api/comments/1")
           .expect(204)
           .then(async () => {
             const { rows } = await db.query("SELECT * FROM comments;");
             expect(rows.length).toBe(17);
+            expect(rows[0].comment_id).not.toBe("1");
+            expect(rows[0]).not.toEqual(comment1);
           });
       });
     });
