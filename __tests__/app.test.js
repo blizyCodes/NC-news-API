@@ -16,6 +16,7 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(typeof body).toBe("object");
+            // expect(body).toEqual()
           });
       });
     });

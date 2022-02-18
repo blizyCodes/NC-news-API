@@ -26,13 +26,14 @@ app.use(express.json());
 
 //endpoints
 app.get("/api", getEndpoints);
-app.get("/api/topics", getTopics);
-app.get("/api/articles/:article_id", getArticleById);
-app.patch("/api/articles/:article_id", patchArticleById);
-app.get("/api/users", getUsers);
 app.get("/api/articles", getArticles);
+app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+app.patch("/api/articles/:article_id", patchArticleById);
 app.post("/api/articles/:article_id/comments", postComment);
+app.get("/api/topics", getTopics);
+app.get("/api/users", getUsers);
+
 
 //path not found
 app.get("/*", invalidEndpoint);
