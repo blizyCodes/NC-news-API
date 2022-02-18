@@ -32,9 +32,34 @@ exports.updateArticlebyId = async (voteUpdates, id) => {
   return article;
 };
 
-exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
-  const { rows } = await db.query(
-    `SELECT
+exports.selectArticles = async (
+  sort_by = "created_at",
+  order = "DESC",
+  topic
+) => {
+  const sortByGreenList = [
+    "title",
+    "topic",
+    "author",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
+  const orderGreenList = ["asc", "desc"];
+
+  if (!sortByGreenList.includes(sort_by))
+    return Promise.reject({
+      status: 400,
+      msg: `Unable to sort. Sorting by ${sort_by} is an invalid request`,
+    });
+
+  if (!orderGreenList.includes(order.toLowerCase()))
+    return Promise.reject({
+      status: 400,
+      msg: `Unable to order. Ordering by notASortBy is an invalid request`,
+    });
+
+  let queryPsql = `SELECT
     articles.article_id, 
     articles.title, 
     articles.topic, 
@@ -43,8 +68,17 @@ exports.selectArticles = async (sort_by = "created_at", order = "desc") => {
     articles.votes,
     COUNT(comments.article_id)::int AS comment_count 
    FROM articles
-   LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`
-  );
+   LEFT JOIN comments ON comments.article_id = articles.article_id`;
+
+  const givenTopic = [];
+  if (topic) {
+    queryPsql += ` WHERE articles.topic = $1`;
+    givenTopic.push(topic);
+  }
+
+  queryPsql += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+
+  const { rows } = await db.query(queryPsql, givenTopic);
   return rows;
 };
 
@@ -55,5 +89,15 @@ exports.checkArticleExists = async (id) => {
   );
   if (rows.length === 0) {
     return Promise.reject({ status: 404, msg: "article not found" });
+  }
+};
+
+exports.checkTopicExists = async (topic) => {
+  if (!topic) return Promise.resolve;
+  const { rows } = await db.query("SELECT * FROM topics WHERE slug = $1;", [
+    topic,
+  ]);
+  if (rows.length === 0) {
+    return Promise.reject({ status: 404, msg: "topic not found" });
   }
 };
