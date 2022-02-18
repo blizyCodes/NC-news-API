@@ -211,6 +211,72 @@ describe("/api/articles", () => {
             });
           });
       });
+      test("should respond with articles sorted by votes at client request ", () => {
+        return request(app)
+          .get("/api/articles?sort_by=votes")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("votes", { descending: true });
+          });
+      });
+      test("should respond with articles in ascending order at client request", () => {
+        return request(app)
+          .get("/api/articles?sort_by=votes&order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("votes");
+          });
+      });
+      test("should respond with articles of a given topic only", () => {
+        return request(app)
+          .get("/api/articles/?topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            articles.forEach((article) => {
+              expect(article.topic).toEqual("mitch");
+            });
+          });
+      });
+      test("should respond with an empty array when topic exists but there are no articles for that topic", () => {
+        return request(app)
+          .get("/api/articles/?topic=paper")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(0);
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with bad request if order is anything but asc or desc", () => {
+        return request(app)
+          .get("/api/articles?order=notAnOrder")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe(
+              "Unable to order. Ordering by notASortBy is an invalid request"
+            );
+          });
+      });
+      test("should respond with bad request if sort_by is anything but title,topic,author,created_at,votes or comment count", () => {
+        return request(app)
+          .get("/api/articles?sort_by=notASortBy")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe(
+              "Unable to sort. Sorting by notASortBy is an invalid request"
+            );
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("should respond with topic not found if topic doesn't exist when requesting to see articles of that topic", () => {
+        return request(app)
+          .get("/api/articles/?topic=notATopic")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("topic not found");
+          });
+      });
     });
   });
 });
