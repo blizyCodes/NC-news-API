@@ -2,7 +2,6 @@ const {
   selectComments,
   insertComment,
   deleteCommentByCommentId,
-  checkCommentExists,
 } = require("../models/comments-models");
 const { checkArticleExists } = require("../models/articles-models");
 
@@ -29,10 +28,10 @@ exports.postComment = (req, res, next) => {
 
 exports.removeComment = (req, res, next) => {
   const { comment_id: commentId } = req.params;
-  Promise.all([
-    checkCommentExists(commentId),
-    deleteCommentByCommentId(commentId),
-  ])
+  deleteCommentByCommentId(commentId)
     .then(() => res.sendStatus(204))
-    .catch((err) => next(err));
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    });
 };
