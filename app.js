@@ -16,6 +16,7 @@ const {
 const {
   getCommentsByArticleId,
   postComment,
+  removeComment,
 } = require("./controllers/comments-controllers");
 
 const { getUsers } = require("./controllers/users-controllers");
@@ -31,7 +32,9 @@ app.get("/api/users", getUsers);
 
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
-app.post("/api/articles/:article_id/comments", postComment)
+app.post("/api/articles/:article_id/comments", postComment);
+app.delete("/api/comments/:comment_id", removeComment);
+
 //path not found
 app.get("/*", invalidEndpoint);
 

@@ -327,3 +327,23 @@ describe("/api/articles/:article_id/comments", () => {
     });
   });
 });
+
+// describe("/api/comments/:comment_id", () => {
+//   describe("DELETE", () => {
+//     describe("STATUS 204", () => {
+//       test("should delete a comment", () => {
+//         return request(app).delete("/api/comments/1").expect(204);
+//       });
+//       test("should ensure comment is deleted", () => {
+//         const comment1 = {
+//           body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+//           votes: 16,
+//           author: "butter_bridge",
+//           article_id: 9,
+//           created_at: 1586179020000,
+//         };
+//         return request(app).delete("/api/comments/1").expect(204).then()
+//       });
+//     });
+//   });
+// });
