@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const { getTopics } = require("./controllers/topics-controllers");
+const apiRouter = require("./routes/api-router");
+
 const {
   invalidEndpoint,
   handleCustomErrors,
@@ -8,35 +9,13 @@ const {
   handlePsqlErrors,
 } = require("./errors");
 
-const {
-  getArticleById,
-  patchArticleById,
-  getArticles,
-} = require("./controllers/articles-controllers");
-
-const {
-  getCommentsByArticleId,
-  postComment,
-  removeComment,
-} = require("./controllers/comments-controllers");
-
-const { getUsers } = require("./controllers/users-controllers");
-const { getEndpoints } = require("./controllers/utility-controllers");
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
-//endpoints
-app.get("/api", getEndpoints);
-app.get("/api/topics", getTopics);
-app.get("/api/articles", getArticles);
-app.get("/api/articles/:article_id", getArticleById);
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
-app.patch("/api/articles/:article_id", patchArticleById);
-app.post("/api/articles/:article_id/comments", postComment);
-app.get("/api/users", getUsers);
-app.delete("/api/comments/:comment_id", removeComment);
+app.use("/api", apiRouter);
 
 //path not found
 app.get("/*", invalidEndpoint);

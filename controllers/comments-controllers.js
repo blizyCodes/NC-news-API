@@ -14,7 +14,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-exports.postComment = (req, res, next) => {
+exports.postCommentByArticleId = (req, res, next) => {
   const { article_id: articleId } = req.params;
   Promise.all([
     checkArticleExists(articleId),
@@ -26,7 +26,7 @@ exports.postComment = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-exports.removeComment = (req, res, next) => {
+exports.removeCommentByCommentId = (req, res, next) => {
   const { comment_id: commentId } = req.params;
   deleteCommentByCommentId(commentId)
     .then(() => res.sendStatus(204))
