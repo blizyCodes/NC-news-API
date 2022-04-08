@@ -104,14 +104,6 @@ exports.checkTopicExists = async (topic) => {
 
 exports.insertArticle = async (newArticle) => {
   const { title, topic, author, body } = newArticle;
-  if (
-    !newArticle.title ||
-    !newArticle.topic ||
-    !newArticle.author ||
-    !newArticle.body
-  ) {
-    return Promise.reject({ status: 400, msg: "missing required information" });
-  }
   const {
     rows: [article],
   } = await db.query(
