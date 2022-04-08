@@ -68,6 +68,55 @@ describe("/api/topics", () => {
       });
     });
   });
+  describe("POST", () => {
+    describe("STATUS 201", () => {
+      test("should responds with an object with a key of topic with a value of the new topic object added via the request", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({
+            slug: "topic name here",
+            description: "description of topic",
+          })
+          .expect(201)
+          .then(({ body: { topic } }) => {
+            expect(topic).toEqual(
+              expect.objectContaining({
+                slug: "topic name here",
+                description: "description of topic",
+              })
+            );
+          })
+          .then(() => {
+            return request(app)
+              .get("/api/topics")
+              .expect(200)
+              .then(({ body: { topics } }) => {
+                expect(topics).toHaveLength(4);
+              });
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("responds with missing required information if request body is missing slug", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({ description: "I'm not sending a slug, deal with it" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("missing required information");
+          });
+      });
+      test("responds with msg topic already exists if slug already exists in table", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({ slug: "cats", description: "need more cat topics" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("topic already exists");
+          });
+      });
+    });
+  });
 });
 
 describe("/api/articles/:article_id", () => {
@@ -362,10 +411,18 @@ describe("/api/articles", () => {
                 comment_count: 0,
               })
             );
+          })
+          .then(() => {
+            return request(app)
+              .get("/api/articles")
+              .expect(200)
+              .then(({ body: { articles } }) => {
+                expect(articles).toHaveLength(13);
+              });
           });
       });
     });
-    describe.only("STATUS 400", () => {
+    describe("STATUS 400", () => {
       test("responds with msg missing required information if request body does not contain all of the required properties", () => {
         return request(app)
           .post("/api/articles")

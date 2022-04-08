@@ -6,3 +6,19 @@ exports.selectTopics = async () => {
     return Promise.reject({ status: 204, msg: "there are no topics" });
   return rows;
 };
+
+exports.insertTopic = async (slug, description) => {
+  const {
+    rows: [topic],
+  } = await db.query(
+    `
+    INSERT INTO topics
+      (slug, description)
+    VALUES
+      ($1, $2)
+    RETURNING *;
+  `,
+    [slug, description]
+  );
+  return topic;
+};
