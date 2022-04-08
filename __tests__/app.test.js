@@ -337,6 +337,78 @@ describe("/api/articles", () => {
       });
     });
   });
+  describe("POST", () => {
+    describe("STATUS 201", () => {
+      test("Status 201 - responds with an object with a key of article with a value of the new article object added via the request", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "butter_bridge",
+            title: "a normal title",
+            body: "insightful information",
+            topic: "cats",
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).toEqual(
+              expect.objectContaining({
+                created_at: expect.any(String),
+                author: "butter_bridge",
+                title: "a normal title",
+                body: "insightful information",
+                article_id: 13,
+                topic: "cats",
+                votes: 0,
+                comment_count: 0,
+              })
+            );
+          });
+      });
+    });
+    describe.only("STATUS 400", () => {
+      test("responds with msg missing required information if request body does not contain all of the required properties", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "butter_bridge",
+            title: "I'm missing a topic ",
+            body: "I'm a body",
+          })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("missing required information");
+          });
+      });
+      test("responds with msg bad request if request body contains author not present in registered users table", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "not registered user",
+            title: "a title",
+            body: "a body",
+            topic: "cats",
+          })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+      test("responds with msg bad request if request body contains topic not present in topics table", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "butter_bridge",
+            title: "a title",
+            body: "a body",
+            topic: "not registered topic",
+          })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+    });
+  });
 });
 
 describe("/api/articles/:article_id/comments", () => {

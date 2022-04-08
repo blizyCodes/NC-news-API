@@ -101,3 +101,29 @@ exports.checkTopicExists = async (topic) => {
     return Promise.reject({ status: 404, msg: "topic not found" });
   }
 };
+
+exports.insertArticle = async (newArticle) => {
+  const { title, topic, author, body } = newArticle;
+  if (
+    !newArticle.title ||
+    !newArticle.topic ||
+    !newArticle.author ||
+    !newArticle.body
+  ) {
+    return Promise.reject({ status: 400, msg: "missing required information" });
+  }
+  const {
+    rows: [article],
+  } = await db.query(
+    `
+    INSERT INTO articles
+      (title, topic, author, body)
+    VALUES
+      ($1, $2, $3, $4)
+    RETURNING *;
+    `,
+    [title, topic, author, body]
+  );
+  article.comment_count = 0;
+  return article;
+};
