@@ -498,4 +498,75 @@ describe("/api/comments/:comment_id", () => {
       });
     });
   });
+  describe("PATCH", () => {
+    describe("STATUS 200", () => {
+      test("responds with an updated comment object with votes incremented by inc_votes integer", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 5 })
+          .expect(200)
+          .then(({ body: { comment } }) => {
+            expect(comment).toEqual(
+              expect.objectContaining({
+                created_at: expect.any(String),
+                body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                comment_id: 1,
+                article_id: 9,
+                author: "butter_bridge",
+                votes: 21,
+              })
+            );
+          });
+      });
+      test("decrements votes if inc_votes is a negative integer", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: -5 })
+          .expect(200)
+          .then(({ body: { comment } }) => {
+            expect(comment.votes).toBe(11);
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("should respond with bad request when given an empty object as body", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({})
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("no updates requested");
+          });
+      });
+      test("responds with msg bad request if request body contains inc_votes with an invalid value", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: "not-a-number" })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+      test("responds with bad request if requested comment_id isn't an integer", () => {
+        return request(app)
+          .patch("/api/comments/not-an-int")
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("responds with msg comment not found when comment_id is valid but there isn't a comment with such id yet", () => {
+        return request(app)
+          .patch("/api/comments/5555")
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("comment not found");
+          });
+      });
+    });
+  });
 });
