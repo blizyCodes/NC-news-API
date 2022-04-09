@@ -6,9 +6,6 @@ exports.selectArticleById = async (id) => {
     [id]
   );
   const article = rows[0];
-  if (!article) {
-    return Promise.reject({ status: 404, msg: "article not found" });
-  }
   return article;
 };
 
@@ -117,5 +114,20 @@ exports.insertArticle = async (newArticle) => {
     [title, topic, author, body]
   );
   article.comment_count = 0;
+  return article;
+};
+
+exports.deleteArticleById = async (articleId) => {
+  await db.query(
+    `DELETE FROM comments 
+  WHERE article_id = $1 RETURNING *;`,
+    [articleId]
+  );
+  const {
+    rows: [article],
+  } = await db.query(
+    "DELETE FROM articles WHERE article_id = $1 RETURNING *;",
+    [articleId]
+  );
   return article;
 };
