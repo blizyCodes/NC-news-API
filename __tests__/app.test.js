@@ -218,6 +218,43 @@ describe("/api/articles/:article_id", () => {
       });
     });
   });
+  describe("DELETE", () => {
+    describe("STATUS 204", () => {
+      test("deletes an article and sends no response", () => {
+        return request(app)
+          .delete("/api/articles/1")
+          .expect(204)
+          .then(() => {
+            return request(app)
+              .get("/api/articles")
+              .expect(200)
+              .then(({ body: { articles } }) => {
+                expect(articles).toHaveLength(11);
+              });
+          });
+      });
+    });
+    describe("STATUS 400", () => {
+      test("responds with bad request if article_id is not an int", () => {
+        return request(app)
+          .delete("/api/articles/not-an-int")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+    });
+    describe("STATUS 404", () => {
+      test("responds with no article found' when article_id is valid but not in the db yet", () => {
+        return request(app)
+          .delete("/api/articles/5555")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("article not found");
+          });
+      });
+    });
+  });
 });
 
 describe("/api/users", () => {

@@ -4,12 +4,14 @@ const {
   selectArticles,
   checkTopicExists,
   insertArticle,
+  deleteArticleById,
+  checkArticleExists,
 } = require("../models/articles-models");
 
 exports.getArticleById = (req, res, next) => {
   const { article_id: articleId } = req.params;
-  selectArticleById(articleId)
-    .then((article) => {
+  Promise.all([selectArticleById(articleId), checkArticleExists(articleId)])
+    .then(([article]) => {
       res.status(200).send({ article });
     })
     .catch((err) => next(err));
@@ -42,4 +44,15 @@ exports.postArticle = (req, res, next) => {
       res.status(201).send({ article });
     })
     .catch((err) => next(err));
+};
+
+exports.removeArticleById = (req, res, next) => {
+  const { article_id: articleId } = req.params;
+  Promise.all([checkArticleExists(articleId), deleteArticleById(articleId)])
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
