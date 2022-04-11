@@ -63,7 +63,7 @@ describe("/api/topics", () => {
           .get("/api/topiczz")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("path not found");
+            expect(msg).toBe("Path not found.");
           });
       });
     });
@@ -103,7 +103,7 @@ describe("/api/topics", () => {
           .send({ description: "I'm not sending a slug, deal with it" })
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("missing required information");
+            expect(msg).toBe("Missing required information.");
           });
       });
       test("responds with msg topic already exists if slug already exists in table", () => {
@@ -112,7 +112,7 @@ describe("/api/topics", () => {
           .send({ slug: "cats", description: "need more cat topics" })
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("topic already exists");
+            expect(msg).toBe("Topic already exists.");
           });
       });
     });
@@ -159,7 +159,7 @@ describe("/api/articles/:article_id", () => {
           .get("/api/articles/notAnID")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
+            expect(msg).toBe("Bad request.");
           });
       });
     });
@@ -169,7 +169,7 @@ describe("/api/articles/:article_id", () => {
           .get("/api/articles/999")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
+            expect(msg).toBe("Article not found.");
           });
       });
     });
@@ -203,7 +203,7 @@ describe("/api/articles/:article_id", () => {
           .send(voteUpdates)
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
+            expect(msg).toBe("Bad request.");
           });
       });
       test("should respond with bad request when given an empty object as body", () => {
@@ -213,7 +213,7 @@ describe("/api/articles/:article_id", () => {
           .send(voteUpdates)
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("no updates requested");
+            expect(msg).toBe("No updates requested.");
           });
       });
     });
@@ -240,7 +240,7 @@ describe("/api/articles/:article_id", () => {
           .delete("/api/articles/not-an-int")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
+            expect(msg).toBe("Bad request.");
           });
       });
     });
@@ -250,7 +250,7 @@ describe("/api/articles/:article_id", () => {
           .delete("/api/articles/5555")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
+            expect(msg).toBe("Article not found.");
           });
       });
     });
@@ -309,7 +309,7 @@ describe("/api/users/:username", () => {
           .get("/api/users/not-a-user")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("No user found");
+            expect(msg).toBe("No user found.");
           });
       });
     });
@@ -437,7 +437,7 @@ describe("/api/articles", () => {
           .expect(400)
           .then(({ body: { msg } }) => {
             expect(msg).toBe(
-              "Unable to order. Ordering by notASortBy is an invalid request"
+              "Unable to order. Ordering by notASortBy is an invalid request."
             );
           });
       });
@@ -447,7 +447,7 @@ describe("/api/articles", () => {
           .expect(400)
           .then(({ body: { msg } }) => {
             expect(msg).toBe(
-              "Unable to sort. Sorting by notASortBy is an invalid request"
+              "Unable to sort. Sorting by notASortBy is an invalid request."
             );
           });
       });
@@ -456,7 +456,7 @@ describe("/api/articles", () => {
           .get("/api/articles?limit=notANumber")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
+            expect(msg).toBe("Bad request.");
           });
       });
       test("should respond with bad request' if p query isn't a number", () => {
@@ -464,7 +464,7 @@ describe("/api/articles", () => {
           .get("/api/articles?p=notANumber")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
+            expect(msg).toBe("Bad request.");
           });
       });
       test("should respond with limit and p queries must be positive integers' if given negative integers", () => {
@@ -472,14 +472,14 @@ describe("/api/articles", () => {
           .get("/api/articles?limit=-5")
           .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("limit and p must be positive integers");
+            expect(msg).toBe("Limit and p must be positive integers.");
           })
           .then(() => {
             return request(app)
               .get("/api/articles?p=-5")
               .expect(400)
               .then(({ body: { msg } }) => {
-                expect(msg).toBe("limit and p must be positive integers");
+                expect(msg).toBe("Limit and p must be positive integers.");
               });
           });
       });
@@ -489,7 +489,7 @@ describe("/api/articles", () => {
             .get("/api/articles?topic=notATopic")
             .expect(404)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("topic not found");
+              expect(msg).toBe("Topic not found.");
             });
         });
         test("should respond with reached end of articles. please lower your limit or p values when the given p results in no articles returned", () => {
@@ -551,7 +551,7 @@ describe("/api/articles", () => {
             })
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("missing required information");
+              expect(msg).toBe("Missing required information.");
             });
         });
         test("responds with msg bad request if request body contains author not present in registered users table", () => {
@@ -565,7 +565,7 @@ describe("/api/articles", () => {
             })
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
         test("responds with msg bad request if request body contains topic not present in topics table", () => {
@@ -579,7 +579,7 @@ describe("/api/articles", () => {
             })
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
       });
@@ -625,7 +625,7 @@ describe("/api/articles", () => {
             .get("/api/articles/999/comments")
             .expect(404)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("article not found");
+              expect(msg).toBe("Article not found.");
             });
         });
       });
@@ -635,7 +635,7 @@ describe("/api/articles", () => {
             .get("/api/articles/notAnID/comments")
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
       });
@@ -670,7 +670,7 @@ describe("/api/articles", () => {
             .send({ username: "icellusedkars", body: "just a test" })
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
         test("should respond with bad request if given an empty object)", () => {
@@ -680,7 +680,7 @@ describe("/api/articles", () => {
             .send({})
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("no comment submitted");
+              expect(msg).toBe("No comment submitted.");
             });
         });
       });
@@ -692,7 +692,7 @@ describe("/api/articles", () => {
             .send({ username: "icellusedkars", body: "just a test" })
             .expect(404)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("article not found");
+              expect(msg).toBe("Article not found.");
             });
         });
       });
@@ -730,7 +730,7 @@ describe("/api/articles", () => {
             .delete("/api/comments/NotAnId")
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
       });
@@ -740,7 +740,7 @@ describe("/api/articles", () => {
             .delete("/api/comments/999")
             .expect(404)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("comment not found");
+              expect(msg).toBe("Comment not found.");
             });
         });
       });
@@ -782,7 +782,7 @@ describe("/api/articles", () => {
             .send({})
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("no updates requested");
+              expect(msg).toBe("No updates requested.");
             });
         });
         test("responds with msg bad request if request body contains inc_votes with an invalid value", () => {
@@ -791,7 +791,7 @@ describe("/api/articles", () => {
             .send({ inc_votes: "not-a-number" })
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
         test("responds with bad request if requested comment_id isn't an integer", () => {
@@ -800,7 +800,7 @@ describe("/api/articles", () => {
             .send({ inc_votes: 1 })
             .expect(400)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("bad request");
+              expect(msg).toBe("Bad request.");
             });
         });
       });
@@ -811,7 +811,7 @@ describe("/api/articles", () => {
             .send({ inc_votes: 1 })
             .expect(404)
             .then(({ body: { msg } }) => {
-              expect(msg).toBe("comment not found");
+              expect(msg).toBe("Comment not found.");
             });
         });
       });

@@ -36,10 +36,8 @@ exports.getArticles = (req, res, next) => {
       const articles = articlesWithCount[0]; //array of articles based on limit
       const total_count = articlesWithCount[1]; //count of all articles based on topic if specified.
       res.status(200).send({ articles, total_count });
-      console.log(total_count);
     })
     .catch((err) => {
-      console.log(err);
       next(err);
     });
 };

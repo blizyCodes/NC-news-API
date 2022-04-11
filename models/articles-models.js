@@ -14,7 +14,7 @@ exports.updateArticlebyId = async (voteUpdates, id) => {
     Object.keys(voteUpdates).length === 0 ||
     Object.values(voteUpdates).length === 0
   ) {
-    return Promise.reject({ status: 400, msg: "no updates requested" });
+    return Promise.reject({ status: 400, msg: "No updates requested." });
   }
   const { inc_votes: votes } = voteUpdates;
   const { rows } = await db.query(
@@ -24,7 +24,7 @@ exports.updateArticlebyId = async (voteUpdates, id) => {
   const article = rows[0];
 
   if (!article) {
-    return Promise.reject({ status: 404, msg: "article not found" });
+    return Promise.reject({ status: 404, msg: "Article not found." });
   }
   return article;
 };
@@ -49,13 +49,13 @@ exports.selectArticles = async (
   if (!sortByGreenList.includes(sort_by))
     return Promise.reject({
       status: 400,
-      msg: `Unable to sort. Sorting by ${sort_by} is an invalid request`,
+      msg: `Unable to sort. Sorting by ${sort_by} is an invalid request.`,
     });
 
   if (!orderGreenList.includes(order.toLowerCase()))
     return Promise.reject({
       status: 400,
-      msg: `Unable to order. Ordering by notASortBy is an invalid request`,
+      msg: `Unable to order. Ordering by notASortBy is an invalid request.`,
     });
 
   let queryPsql = `SELECT
@@ -102,7 +102,6 @@ exports.selectArticles = async (
     Math.ceil(limitlessArticles.length / limit) < page &&
     Math.ceil(limitlessArticles.length / limit) > 0
   ) {
-    console.log(Math.ceil(limitlessArticles.length / limit));
     return Promise.reject({
       status: 404,
       msg: "Reached end of articles. Please lower your limit or p values.",
@@ -117,7 +116,7 @@ exports.checkArticleExists = async (id) => {
     [id]
   );
   if (rows.length === 0) {
-    return Promise.reject({ status: 404, msg: "article not found" });
+    return Promise.reject({ status: 404, msg: "Article not found." });
   }
 };
 
@@ -127,7 +126,7 @@ exports.checkTopicExists = async (topic) => {
     topic,
   ]);
   if (rows.length === 0) {
-    return Promise.reject({ status: 404, msg: "topic not found" });
+    return Promise.reject({ status: 404, msg: "Topic not found." });
   }
 };
 
