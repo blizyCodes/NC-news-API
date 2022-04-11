@@ -9,6 +9,10 @@ exports.handlePsqlErrors = (err, req, res, next) => {
     res.status(400).send({ msg: "topic already exists" });
   } else if (err.code === "23502") {
     res.status(400).send({ msg: "missing required information" });
+  } else if (["2201W", "2201X"].includes(err.code)) {
+    res
+      .status(400)
+      .send({ msg: "limit and p must be positive integers" });
   } else next(err);
 };
 

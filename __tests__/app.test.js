@@ -228,8 +228,8 @@ describe("/api/articles/:article_id", () => {
             return request(app)
               .get("/api/articles")
               .expect(200)
-              .then(({ body: { articles } }) => {
-                expect(articles).toHaveLength(11);
+              .then(({ body: { total_count } }) => {
+                expect(total_count).toBe(11);
               });
           });
       });
@@ -324,7 +324,7 @@ describe("/api/articles", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
-            expect(articles).toHaveLength(12);
+            expect(articles).toHaveLength(10);
             articles.forEach((article) => {
               expect(article).toEqual(
                 expect.objectContaining({
@@ -340,12 +340,20 @@ describe("/api/articles", () => {
             expect(articles).toBeSortedBy("created_at", { descending: true });
           });
       });
+      test("return contains a total_count property", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { total_count } }) => {
+            expect(total_count).toBe(12);
+          });
+      });
       test("should also include comment_count as a property", () => {
         return request(app)
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
-            expect(articles).toHaveLength(12);
+            expect(articles).toHaveLength(10);
             articles.forEach((article) => {
               expect(article).toEqual(
                 expect.objectContaining({
@@ -389,6 +397,38 @@ describe("/api/articles", () => {
             expect(articles).toHaveLength(0);
           });
       });
+      test("should respond with 10 articles as default limit is set to 10", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(10);
+          });
+      });
+      test("should be able to take limit by a query", () => {
+        return request(app)
+          .get("/api/articles?limit=2")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(2);
+          });
+      });
+      test("should return all articles if limit is 0", () => {
+        return request(app)
+          .get("/api/articles?limit=0")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(12);
+          });
+      });
+      test("should be able to take page as a query", () => {
+        return request(app)
+          .get("/api/articles?p=2")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(2);
+          });
+      });
     });
     describe("STATUS 400", () => {
       test("should respond with bad request if order is anything but asc or desc", () => {
@@ -411,327 +451,369 @@ describe("/api/articles", () => {
             );
           });
       });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with topic not found if topic doesn't exist when requesting to see articles of that topic", () => {
+      test("should respond with bad request' if limit query isn't a number", () => {
         return request(app)
-          .get("/api/articles/?topic=notATopic")
-          .expect(404)
+          .get("/api/articles?limit=notANumber")
+          .expect(400)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("topic not found");
+            expect(msg).toBe("bad request");
           });
       });
-    });
-  });
-  describe("POST", () => {
-    describe("STATUS 201", () => {
-      test("Status 201 - responds with an object with a key of article with a value of the new article object added via the request", () => {
+      test("should respond with bad request' if p query isn't a number", () => {
         return request(app)
-          .post("/api/articles")
-          .send({
-            author: "butter_bridge",
-            title: "a normal title",
-            body: "insightful information",
-            topic: "cats",
-          })
-          .expect(201)
-          .then(({ body: { article } }) => {
-            expect(article).toEqual(
-              expect.objectContaining({
-                created_at: expect.any(String),
-                author: "butter_bridge",
-                title: "a normal title",
-                body: "insightful information",
-                article_id: 13,
-                topic: "cats",
-                votes: 0,
-                comment_count: 0,
-              })
-            );
+          .get("/api/articles?p=notANumber")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("bad request");
+          });
+      });
+      test("should respond with limit and p queries must be positive integers' if given negative integers", () => {
+        return request(app)
+          .get("/api/articles?limit=-5")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("limit and p must be positive integers");
           })
           .then(() => {
             return request(app)
-              .get("/api/articles")
-              .expect(200)
-              .then(({ body: { articles } }) => {
-                expect(articles).toHaveLength(13);
+              .get("/api/articles?p=-5")
+              .expect(400)
+              .then(({ body: { msg } }) => {
+                expect(msg).toBe("limit and p must be positive integers");
               });
           });
       });
+      describe("STATUS 404", () => {
+        test("should respond with topic not found if topic doesn't exist when requesting to see articles of that topic", () => {
+          return request(app)
+            .get("/api/articles?topic=notATopic")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("topic not found");
+            });
+        });
+        test("should respond with reached end of articles. please lower your limit or p values when the given p results in no articles returned", () => {
+          return request(app)
+            .get("/api/articles?p=55")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe(
+                "Reached end of articles. Please lower your limit or p values."
+              );
+            });
+        });
+      });
     });
-    describe("STATUS 400", () => {
-      test("responds with msg missing required information if request body does not contain all of the required properties", () => {
-        return request(app)
-          .post("/api/articles")
-          .send({
-            author: "butter_bridge",
-            title: "I'm missing a topic ",
-            body: "I'm a body",
-          })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("missing required information");
-          });
+    describe("POST", () => {
+      describe("STATUS 201", () => {
+        test("Status 201 - responds with an object with a key of article with a value of the new article object added via the request", () => {
+          return request(app)
+            .post("/api/articles")
+            .send({
+              author: "butter_bridge",
+              title: "a normal title",
+              body: "insightful information",
+              topic: "cats",
+            })
+            .expect(201)
+            .then(({ body: { article } }) => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  created_at: expect.any(String),
+                  author: "butter_bridge",
+                  title: "a normal title",
+                  body: "insightful information",
+                  article_id: 13,
+                  topic: "cats",
+                  votes: 0,
+                  comment_count: 0,
+                })
+              );
+            })
+            .then(() => {
+              return request(app)
+                .get("/api/articles")
+                .expect(200)
+                .then(({ body: { total_count } }) => {
+                  expect(total_count).toBe(13);
+                });
+            });
+        });
       });
-      test("responds with msg bad request if request body contains author not present in registered users table", () => {
-        return request(app)
-          .post("/api/articles")
-          .send({
-            author: "not registered user",
-            title: "a title",
-            body: "a body",
-            topic: "cats",
-          })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-      test("responds with msg bad request if request body contains topic not present in topics table", () => {
-        return request(app)
-          .post("/api/articles")
-          .send({
-            author: "butter_bridge",
-            title: "a title",
-            body: "a body",
-            topic: "not registered topic",
-          })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
+      describe("STATUS 400", () => {
+        test("responds with msg missing required information if request body does not contain all of the required properties", () => {
+          return request(app)
+            .post("/api/articles")
+            .send({
+              author: "butter_bridge",
+              title: "I'm missing a topic ",
+              body: "I'm a body",
+            })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("missing required information");
+            });
+        });
+        test("responds with msg bad request if request body contains author not present in registered users table", () => {
+          return request(app)
+            .post("/api/articles")
+            .send({
+              author: "not registered user",
+              title: "a title",
+              body: "a body",
+              topic: "cats",
+            })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+        test("responds with msg bad request if request body contains topic not present in topics table", () => {
+          return request(app)
+            .post("/api/articles")
+            .send({
+              author: "butter_bridge",
+              title: "a title",
+              body: "a body",
+              topic: "not registered topic",
+            })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
       });
     });
   });
-});
 
-describe("/api/articles/:article_id/comments", () => {
-  describe("GET", () => {
-    describe("STATUS 200", () => {
-      test("should respond with an array of comments objects with comment_id, votes, created_at, author and body properties", () => {
-        const ARTICLE_ID = 5;
-        return request(app)
-          .get(`/api/articles/${ARTICLE_ID}/comments`)
-          .expect(200)
-          .then(({ body: { comments } }) => {
-            expect(comments).toHaveLength(2);
-            comments.forEach((comment) => {
+  describe("/api/articles/:article_id/comments", () => {
+    describe("GET", () => {
+      describe("STATUS 200", () => {
+        test("should respond with an array of comments objects with comment_id, votes, created_at, author and body properties", () => {
+          const ARTICLE_ID = 5;
+          return request(app)
+            .get(`/api/articles/${ARTICLE_ID}/comments`)
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments).toHaveLength(2);
+              comments.forEach((comment) => {
+                expect(comment).toEqual(
+                  expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                  })
+                );
+              });
+            });
+        });
+        test("should respond with empty array if no comments for said article", () => {
+          const ARTICLE_ID = 2;
+          return request(app)
+            .get(`/api/articles/${ARTICLE_ID}/comments`)
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments).toHaveLength(0);
+            });
+        });
+      });
+      describe("STATUS 404", () => {
+        test("should respond with not found if valid but non existent article currently", () => {
+          return request(app)
+            .get("/api/articles/999/comments")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("article not found");
+            });
+        });
+      });
+      describe("STATUS 400", () => {
+        test("should respond with Bad Request when given an invalid id (not a number)", () => {
+          return request(app)
+            .get("/api/articles/notAnID/comments")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+      });
+    });
+    describe("POST", () => {
+      describe("STATUS 201", () => {
+        test("should accept request body and respond with the posted comment object with username and body properties", () => {
+          const ARTICLE_ID = 5;
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({ username: "icellusedkars", body: "just a test" })
+            .expect(201)
+            .then(({ body: { comment } }) => {
               expect(comment).toEqual(
                 expect.objectContaining({
-                  comment_id: expect.any(Number),
-                  votes: expect.any(Number),
+                  comment_id: 19,
+                  author: "icellusedkars",
+                  body: "just a test",
+                  votes: 0,
+                  article_id: 5,
                   created_at: expect.any(String),
-                  author: expect.any(String),
-                  body: expect.any(String),
                 })
               );
             });
-          });
+        });
       });
-      test("should respond with empty array if no comments for said article", () => {
-        const ARTICLE_ID = 2;
-        return request(app)
-          .get(`/api/articles/${ARTICLE_ID}/comments`)
-          .expect(200)
-          .then(({ body: { comments } }) => {
-            expect(comments).toHaveLength(0);
-          });
+      describe("STATUS 400", () => {
+        test("should respond with bad request if given a string for article id", () => {
+          const ARTICLE_ID = "notanId";
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({ username: "icellusedkars", body: "just a test" })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+        test("should respond with bad request if given an empty object)", () => {
+          const ARTICLE_ID = 5;
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({})
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("no comment submitted");
+            });
+        });
       });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with not found if valid but non existent article currently", () => {
-        return request(app)
-          .get("/api/articles/999/comments")
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
-          });
-      });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with Bad Request when given an invalid id (not a number)", () => {
-        return request(app)
-          .get("/api/articles/notAnID/comments")
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-    });
-  });
-  describe("POST", () => {
-    describe("STATUS 201", () => {
-      test("should accept request body and respond with the posted comment object with username and body properties", () => {
-        const ARTICLE_ID = 5;
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({ username: "icellusedkars", body: "just a test" })
-          .expect(201)
-          .then(({ body: { comment } }) => {
-            expect(comment).toEqual(
-              expect.objectContaining({
-                comment_id: 19,
-                author: "icellusedkars",
-                body: "just a test",
-                votes: 0,
-                article_id: 5,
-                created_at: expect.any(String),
-              })
-            );
-          });
-      });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with bad request if given a string for article id", () => {
-        const ARTICLE_ID = "notanId";
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({ username: "icellusedkars", body: "just a test" })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-      test("should respond with bad request if given an empty object)", () => {
-        const ARTICLE_ID = 5;
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({})
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("no comment submitted");
-          });
-      });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with not found if valid but non existent article currently", () => {
-        const ARTICLE_ID = "555";
-        return request(app)
-          .post(`/api/articles/${ARTICLE_ID}/comments`)
-          .send({ username: "icellusedkars", body: "just a test" })
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("article not found");
-          });
+      describe("STATUS 404", () => {
+        test("should respond with not found if valid but non existent article currently", () => {
+          const ARTICLE_ID = "555";
+          return request(app)
+            .post(`/api/articles/${ARTICLE_ID}/comments`)
+            .send({ username: "icellusedkars", body: "just a test" })
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("article not found");
+            });
+        });
       });
     });
   });
-});
 
-describe("/api/comments/:comment_id", () => {
-  describe("DELETE", () => {
-    describe("STATUS 204", () => {
-      test("should delete a comment", () => {
-        return request(app).delete("/api/comments/1").expect(204);
+  describe("/api/comments/:comment_id", () => {
+    describe("DELETE", () => {
+      describe("STATUS 204", () => {
+        test("should delete a comment", () => {
+          return request(app).delete("/api/comments/1").expect(204);
+        });
+        test("should ensure comment is deleted", () => {
+          const comment1 = {
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            votes: 16,
+            author: "butter_bridge",
+            article_id: 9,
+            created_at: 1586179020000,
+          };
+          return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+            .then(async () => {
+              const { rows } = await db.query("SELECT * FROM comments;");
+              expect(rows.length).toBe(17);
+              expect(rows[0].comment_id).not.toBe("1");
+              expect(rows[0]).not.toEqual(comment1);
+            });
+        });
       });
-      test("should ensure comment is deleted", () => {
-        const comment1 = {
-          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-          votes: 16,
-          author: "butter_bridge",
-          article_id: 9,
-          created_at: 1586179020000,
-        };
-        return request(app)
-          .delete("/api/comments/1")
-          .expect(204)
-          .then(async () => {
-            const { rows } = await db.query("SELECT * FROM comments;");
-            expect(rows.length).toBe(17);
-            expect(rows[0].comment_id).not.toBe("1");
-            expect(rows[0]).not.toEqual(comment1);
-          });
+      describe("STATUS 400", () => {
+        test("should respond with bad request if comment Id is invalid", () => {
+          return request(app)
+            .delete("/api/comments/NotAnId")
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
       });
-    });
-    describe("STATUS 400", () => {
-      test("should respond with bad request if comment Id is invalid", () => {
-        return request(app)
-          .delete("/api/comments/NotAnId")
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-    });
-    describe("STATUS 404", () => {
-      test("should respond with not found if valid but non existent article currently", () => {
-        return request(app)
-          .delete("/api/comments/999")
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("comment not found");
-          });
-      });
-    });
-  });
-  describe("PATCH", () => {
-    describe("STATUS 200", () => {
-      test("responds with an updated comment object with votes incremented by inc_votes integer", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({ inc_votes: 5 })
-          .expect(200)
-          .then(({ body: { comment } }) => {
-            expect(comment).toEqual(
-              expect.objectContaining({
-                created_at: expect.any(String),
-                body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-                comment_id: 1,
-                article_id: 9,
-                author: "butter_bridge",
-                votes: 21,
-              })
-            );
-          });
-      });
-      test("decrements votes if inc_votes is a negative integer", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({ inc_votes: -5 })
-          .expect(200)
-          .then(({ body: { comment } }) => {
-            expect(comment.votes).toBe(11);
-          });
+      describe("STATUS 404", () => {
+        test("should respond with not found if valid but non existent article currently", () => {
+          return request(app)
+            .delete("/api/comments/999")
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("comment not found");
+            });
+        });
       });
     });
-    describe("STATUS 400", () => {
-      test("should respond with bad request when given an empty object as body", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({})
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("no updates requested");
-          });
+    describe("PATCH", () => {
+      describe("STATUS 200", () => {
+        test("responds with an updated comment object with votes incremented by inc_votes integer", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: 5 })
+            .expect(200)
+            .then(({ body: { comment } }) => {
+              expect(comment).toEqual(
+                expect.objectContaining({
+                  created_at: expect.any(String),
+                  body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                  comment_id: 1,
+                  article_id: 9,
+                  author: "butter_bridge",
+                  votes: 21,
+                })
+              );
+            });
+        });
+        test("decrements votes if inc_votes is a negative integer", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: -5 })
+            .expect(200)
+            .then(({ body: { comment } }) => {
+              expect(comment.votes).toBe(11);
+            });
+        });
       });
-      test("responds with msg bad request if request body contains inc_votes with an invalid value", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({ inc_votes: "not-a-number" })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
+      describe("STATUS 400", () => {
+        test("should respond with bad request when given an empty object as body", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({})
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("no updates requested");
+            });
+        });
+        test("responds with msg bad request if request body contains inc_votes with an invalid value", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: "not-a-number" })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
+        test("responds with bad request if requested comment_id isn't an integer", () => {
+          return request(app)
+            .patch("/api/comments/not-an-int")
+            .send({ inc_votes: 1 })
+            .expect(400)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("bad request");
+            });
+        });
       });
-      test("responds with bad request if requested comment_id isn't an integer", () => {
-        return request(app)
-          .patch("/api/comments/not-an-int")
-          .send({ inc_votes: 1 })
-          .expect(400)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("bad request");
-          });
-      });
-    });
-    describe("STATUS 404", () => {
-      test("responds with msg comment not found when comment_id is valid but there isn't a comment with such id yet", () => {
-        return request(app)
-          .patch("/api/comments/5555")
-          .send({ inc_votes: 1 })
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("comment not found");
-          });
+      describe("STATUS 404", () => {
+        test("responds with msg comment not found when comment_id is valid but there isn't a comment with such id yet", () => {
+          return request(app)
+            .patch("/api/comments/5555")
+            .send({ inc_votes: 1 })
+            .expect(404)
+            .then(({ body: { msg } }) => {
+              expect(msg).toBe("comment not found");
+            });
+        });
       });
     });
   });
