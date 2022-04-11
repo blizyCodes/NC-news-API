@@ -32,7 +32,9 @@ exports.updateArticlebyId = async (voteUpdates, id) => {
 exports.selectArticles = async (
   sort_by = "created_at",
   order = "DESC",
-  topic
+  topic,
+  limit = 10,
+  page = 1
 ) => {
   const sortByGreenList = [
     "title",
@@ -67,16 +69,46 @@ exports.selectArticles = async (
    FROM articles
    LEFT JOIN comments ON comments.article_id = articles.article_id`;
 
-  const givenTopic = [];
+  const offset = (page - 1) * limit;
+  const queryValues = [];
+
   if (topic) {
+    queryValues.push(topic);
     queryPsql += ` WHERE articles.topic = $1`;
-    givenTopic.push(topic);
   }
 
-  queryPsql += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+  let noLimitQuery = queryPsql;
+  let noLimitQueryValues = [...queryValues];
 
-  const { rows } = await db.query(queryPsql, givenTopic);
-  return rows;
+  noLimitQuery += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+
+  queryPsql += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order} `;
+
+  if (limit === "0") queryPsql += "LIMIT ALL OFFSET 0;";
+  else {
+    queryPsql += `LIMIT $${queryValues.length + 1} OFFSET $${
+      queryValues.length + 2
+    };`;
+    queryValues.push(limit, offset);
+  }
+
+  const limitless = db.query(noLimitQuery, noLimitQueryValues);
+  const limited = db.query(queryPsql, queryValues);
+  const [{ rows: limitlessArticles }, { rows: articles }] = await Promise.all([
+    limitless,
+    limited,
+  ]);
+  if (
+    Math.ceil(limitlessArticles.length / limit) < page &&
+    Math.ceil(limitlessArticles.length / limit) > 0
+  ) {
+    console.log(Math.ceil(limitlessArticles.length / limit));
+    return Promise.reject({
+      status: 404,
+      msg: "Reached end of articles. Please lower your limit or p values.",
+    });
+  }
+  return [articles, limitlessArticles.length];
 };
 
 exports.checkArticleExists = async (id) => {

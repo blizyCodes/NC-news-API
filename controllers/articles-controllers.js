@@ -27,14 +27,21 @@ exports.patchArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const sortBy = req.query.sort_by;
-  const order = req.query.order;
-  const topic = req.query.topic;
-  Promise.all([selectArticles(sortBy, order, topic), checkTopicExists(topic)])
-    .then(([articles]) => {
-      res.status(200).send({ articles });
+  const { sort_by: sortBy, order, topic, limit, p: page } = req.query;
+  Promise.all([
+    selectArticles(sortBy, order, topic, limit, page),
+    checkTopicExists(topic),
+  ])
+    .then(([articlesWithCount]) => {
+      const articles = articlesWithCount[0]; //array of articles based on limit
+      const total_count = articlesWithCount[1]; //count of all articles based on topic if specified.
+      res.status(200).send({ articles, total_count });
+      console.log(total_count);
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    });
 };
 
 exports.postArticle = (req, res, next) => {
