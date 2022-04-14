@@ -31,56 +31,54 @@ It allows a user to interact with placeholder articles/comments data in ways des
 
 - `GET /api/users/:username` - GET a specific user using a username parameter.
 
+## Cloning and installing modules
+
+This repository can be cloned via one of the links shown in the "code" dropdown at the top of this page.
+
+HTTPS link for convenience:
+
+```
+https://github.com/donblizy/News-API.git
+```
+
+Once cloned, navigate to that directory in your terminal and run the below command to install all of the dependencies needed as found in the package.json file.
+The command is: `npm i` .
+
 ## System setup
 
 In order for a local copy to function in your system there are a few things that need to be set up.
 
-1. Please install the below:
+Please install the below:
 
 - [Node](https://nodejs.org/en/) (version 17+)
 - [npm](https://www.npmjs.com/) (version 8.1+)
 - [PostgreSQL](https://www.postgresql.org/) (version 13.5+)
 
-Versions earlier than those listed may work but have not been tested
+Versions earlier than those listed may work but have not been tested.
 
-2. You will also need to create two .env files for this project locally: `.env.test` and `.env.development`.
+## Environment setup
+
+You will need to create two .env files for this project locally: `.env.test` and `.env.development`.
 
 Into each, add `PGDATABASE=<database_name_here>`, with the correct database name for that environment (see `/db/setup.sql` for the database names).
 
 \*\*<b>THIS IS VITAL FOR CONNECTING THE TWO DATABASES LOCALLY<b>\*\*
 
-## Cloning and installing modules
-
-This repository can be cloned via one of the links shown in the "code" dropdown at the top of this page. 
-
-HTTPS link for convenience: 
-
-```
-https://github.com/donblizy/News-API.git 
-```
-Once cloned, navigate to that directory in your terminal and run the below command to install all of the dependencies needed as found in the package.json file. 
-The command is: `npm i` . 
-
-
-
 ## Creating and seeding the databases
 
 In order to create both the development and test databases you will need to run `npm run setup-dbs` .
 
-Following that, run `npm run seed` to populate them with placeholder data. 
+Following that, run `npm run seed` to populate them with placeholder data.
 
+## Testing
 
-## Testing 
-
-Everything was written using the Test Driven Development paradigm. 
-Through `npm i` you should have Jest installed which is a popular Javascript testing framework. 
-In order to run the current tests, please run `npm t` in your terminal. 
-
+Everything was written using the Test Driven Development paradigm.
+Through `npm i` you should have Jest installed which is a popular Javascript testing framework.
+In order to run the current tests, please run `npm t` in your terminal.
 
 ## Trying it
 
-You can run `npm run start` in order to start a locally hosted version. 
+You can run `npm run start` in order to start a locally hosted version.
 This automatically opens up a local port at 9090 by default (can be changed in the listen.js file) which allows you to make any HTTP request. A recommended program to do such requests is [Insomnia](https://insomnia.rest/download) .
 
-As a suggestion, it would be best to perform a GET request to `/api` which will bring up all your options along with example responses and expected statuses. 
-
+As a suggestion, it would be best to perform a GET request to `/api` which will bring up all your options along with example responses and expected statuses.
