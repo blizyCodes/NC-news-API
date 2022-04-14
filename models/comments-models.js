@@ -16,7 +16,7 @@ exports.insertComment = async (usersComment, id) => {
     Object.keys(usersComment).length === 0 ||
     Object.values(usersComment).length === 0
   ) {
-    return Promise.reject({ status: 400, msg: "no comment submitted" });
+    return Promise.reject({ status: 400, msg: "No comment submitted." });
   }
   const { rows } = await db.query(
     `INSERT INTO comments (article_id, author, body) VALUES ($1, $2, $3) RETURNING *;`,
@@ -31,12 +31,12 @@ exports.deleteCommentByCommentId = async (id) => {
     [id]
   );
   if (rows.length === 0)
-    return Promise.reject({ status: 404, msg: "comment not found" });
+    return Promise.reject({ status: 404, msg: "Comment not found." });
 };
 
 exports.updateCommentById = async (incVotes, commentId) => {
   if (!incVotes) {
-    return Promise.reject({ status: 400, msg: "no updates requested" });
+    return Promise.reject({ status: 400, msg: "No updates requested." });
   }
   const {
     rows: [comment],
@@ -47,7 +47,7 @@ exports.updateCommentById = async (incVotes, commentId) => {
   if (!comment)
     return Promise.reject({
       status: 404,
-      msg: "comment not found",
+      msg: "Comment not found.",
     });
   return comment;
 };

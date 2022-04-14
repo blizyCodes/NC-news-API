@@ -1,39 +1,93 @@
 {
   "GET /api": {
-    "description": "serves up a json representation of all the available endpoints of the api"
+    "description": "Serves up a JSON representation of all the available endpoints of the API."
   },
+
   "GET /api/topics": {
-    "description": "serves an array of all topics",
+    "description": "Serves an array of all topics.",
     "queries": [],
+    "expectedStatus": 200,
     "exampleResponse": {
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+
+  "POST /api/topics": {
+    "description": "Adds a new topic to the database and responds with an object with the newly added created topic",
+    "queries": [],
+    "expectedStatus": 201,
+    "exampleResponse": {
+      "topics": [
+        { "slug": "newTopic", "description": "new topic's description!" }
+      ]
+    }
+  },
+
   "GET /api/articles": {
-    "description": "serves an array of all topics",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "description": "Serves an array of paginated articles and a total_count of all the articles matching the filter",
+    "queries": [
+      "sort_by (author || title || topic || votes || date *default* || comment_count ",
+      "order (ASC || DESC *default*)",
+      "topic (exact match)",
+      "limit (number of articles to display per page *default: 10*  )",
+      "page (defines the page of results to fetch *default: 1*  )"
+    ],
+    "expectedStatus": 200,
     "exampleResponse": {
       "articles": [
         {
+          "article_id": 33,
           "title": "Seafood substitutions are increasing",
           "topic": "cooking",
           "author": "weegembump",
-          "body": "Text from the article..",
-          "created_at": 1527695953341
+          "votes": 2,
+          "created_at": "2020-01-10T05:00:00.000Z",
+          "comment_count": 23
         },
         {
+          "article_id": 33,
           "title": "Seafood substitutions are increasing take 2",
           "topic": "cooking",
           "author": "weegembump",
-          "body": "continuation of take one",
-          "created_at": 1627695953355
+          "votes": 34,
+          "created_at": "2021-01-10T05:00:00.000Z",
+          "comment_count": 5
+        }
+      ],
+      "total_count": 2
+    }
+  },
+
+  "POST /api/articles": {
+    "description": "Post a new article and responds with an object containing the newly added article",
+    "queries": [],
+    "expectedStatus": 200,
+    "exampleRequest": {
+      "author": "niceGuy54",
+      "title": "my title",
+      "body": "etc.",
+      "topic": "birds"
+    },
+    "exampleResponse": {
+      "articles": [
+        {
+          "article_id": 44,
+          "author": "niceGuy54",
+          "title": "my title",
+          "body": "etc.",
+          "created_at": "2021-01-10T05:00:00.000Z",
+          "topic": "birds",
+          "votes": 0,
+          "comment_count": 0
         }
       ]
     }
   },
+
   "GET /api/articles/:article_id": {
-    "description": "serves an object of the requested article",
+    "description": "serves an object of the requested article based on article_id provided",
     "queries": [],
+    "expectedStatus": 200,
     "exampleResponse": {
       "article": {
         "article_id": 3,
@@ -47,9 +101,37 @@
       }
     }
   },
-  "GET /api/articles/:article_id/comments": {
-    "description": "serves an array of comment objects for the requested article",
+
+  "PATCH /api/articles/:article_id": {
+    "description": "serves an article object with the new votes amount after downvoting/upvoting",
     "queries": [],
+    "expectedStatus": 200,
+    "exampleRequest": { "inc_votes": 1 },
+    "exampleResponse": {
+      "article": {
+        "article_id": 5,
+        "title": "a great article",
+        "body": "life is great",
+        "votes": 51,
+        "topic": "nature",
+        "author": "charles111",
+        "created_at": "2021-01-10T05:00:00.000Z",
+        "comment_count": 22
+      }
+    }
+  },
+
+  "DELETE /api/articles/:article_id": {
+    "description": "Deletes the article from the database and all of its comments",
+    "queries": [],
+    "expectedStatus": 204,
+    "exampleResponse": "does not send a response"
+  },
+
+  "GET /api/articles/:article_id/comments": {
+    "description": "Serves an array of comment objects for the requested article",
+    "queries": [],
+    "expectedStatus": 200,
     "exampleResponse": {
       "comments": [
         {
@@ -69,24 +151,9 @@
       ]
     }
   },
-  "PATCH /api/articles/:article_id": {
-    "description": "serves an article object with the new votes amount after downvoting/upvoting",
-    "queries": [],
-    "exampleRequest": { "inc_votes": 1 },
-    "exampleResponse": {
-      "article": {
-        "article_id": 5,
-        "title": "a great article",
-        "body": "life is great",
-        "votes": 51,
-        "topic": "nature",
-        "author": "charles111",
-        "created_at": "2021-01-10T05:00:00.000Z"
-      }
-    }
-  },
+
   "POST /api/articles/:article_id/comments": {
-    "description": "serves the newly created comment as an object",
+    "description": "Adds a comment to the specified article and serves the newly created comment as an object",
     "queries": [],
     "exampleRequest": { "username": "bob55", "body": "I'm doing ok" },
     "exampleResponse": {
@@ -100,16 +167,50 @@
       }
     }
   },
-  "GET /api/users": {
-    "description": "serves an array of the users as objects",
+
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the comment based on comment id",
     "queries": [],
+    "expectedStatus": 204,
+    "exampleResponse": "does not send a response"
+  },
+
+  "PATCH /api/comments/:comment_id": {
+    "description": "serves a comment object with the new votes amount after downvoting/upvoting",
+    "queries": [],
+    "expectedStatus": 204,
+    "exampleRequest": { "inc_votes": -1 },
+    "exampleResponse": {
+      "comment_id": 55,
+      "article_id": 2,
+      "created_at": "2021-01-10T05:00:00.000Z",
+      "author": "niceGuy52",
+      "votes": -1,
+      "body": "not a great article.."
+    }
+  },
+
+  "GET /api/users": {
+    "description": "Serves an array of the users as objects.",
+    "queries": [],
+    "expectedStatus": 200,
     "exampleResponse": {
       "users": [{ "username": "doug66" }, { "username": "cuteMouse1" }]
     }
   },
-  "DELETE /api/comments/:comment_id": {
-    "description": "deletes the comment based on comment id",
+
+  "GET /api/users/:username": {
+    "description": "Serves a user object matching the username provided",
     "queries": [],
-    "exampleResponse": "does not send a response"
+    "expectedStatus": 200,
+    "exampleResponse": {
+      "user": [
+        {
+          "username": "doug66",
+          "name": "Douglas",
+          "avatar_url": "Link to avatar"
+        }
+      ]
+    }
   }
 }
