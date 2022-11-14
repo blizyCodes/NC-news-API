@@ -2,7 +2,7 @@
 
 ## Live Version
 
-Live version of this app [hosted here](https://nb-news.herokuapp.com/api) using [Heroku](https://heroku.com).
+Live version of this app [hosted here](https://ncnewsapi.cyclic.app/api) using [Cyclic](https://www.cyclic.sh/).
 
 ## Project Summary
 
